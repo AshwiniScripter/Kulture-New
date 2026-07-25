@@ -82,7 +82,6 @@ const FAQBot = () => {
             ))}
           </div>
 
-          {/* Input Form */}
           <form onSubmit={handleSend} className="p-3 bg-[#181818] border-t border-neutral-800 flex gap-2">
             <input
               type="text"

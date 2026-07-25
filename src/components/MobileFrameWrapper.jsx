@@ -18,9 +18,9 @@ const MobileFrameWrapper = ({
       >
         {/* Desktop frame border */}
         {showFrame && (
-          <div className="hidden md:block absolute -inset-3 border-2 border-neutral-800 rounded-[2rem] pointer-events-none">
+          <div className="hidden md:block absolute -inset-3 border-2 border-neutral-800 rounded-2rem pointer-events-none">
             {/* Notch */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-0 w-32 h-1 bg-neutral-800 rounded-b-xl" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 translate-y-0 w-32 h-1 bg-neutral-800 rounded-b-xl" />
             {/* Corner accents */}
             <div className="absolute -top-1.5 -left-1.5 w-3 h-3 border-t-2 border-l-2 border-red-600 rounded-tl-md" />
             <div className="absolute -top-1.5 -right-1.5 w-3 h-3 border-t-2 border-r-2 border-red-600 rounded-tr-md" />

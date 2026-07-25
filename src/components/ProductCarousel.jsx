@@ -89,8 +89,8 @@ const ProductCarousel = ({
       </div>
 
       {/* Fade edges */}
-      <div className="pointer-events-none absolute top-0 left-0 w-8 h-full bg-gradient-to-r from-[#0f0f0f] to-transparent z-10" />
-      <div className="pointer-events-none absolute top-0 right-0 w-8 h-full bg-gradient-to-l from-[#0f0f0f] to-transparent z-10" />
+      <div className="pointer-events-none absolute top-0 left-0 w-8 h-full bg-linear-to-r from-[#0f0f0f] to-transparent z-10" />
+      <div className="pointer-events-none absolute top-0 right-0 w-8 h-full bg-linear-to-l from-[#0f0f0f] to-transparent z-10" />
     </section>
   );
 };
@@ -126,7 +126,7 @@ function CarouselCard({
       />
 
       {/* Hover gradient */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-50 group-hover:opacity-90 transition-opacity duration-500" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-50 group-hover:opacity-90 transition-opacity duration-500" />
 
       {/* Wishlist */}
       <motion.button

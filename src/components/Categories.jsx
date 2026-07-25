@@ -112,7 +112,7 @@ const Categories = () => {
               className="relative flex-1 min-h-170px sm:min-h-87.5 lg:min-h-0 rounded-xl sm:rounded-2xl overflow-hidden group border border-neutral-900 shadow-lg" 
               data-aos="fade-up" 
               data-aos-delay="400"
-            >
+            > 
               <img
                 src={pants}
                 alt="Pants"
