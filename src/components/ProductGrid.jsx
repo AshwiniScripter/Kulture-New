@@ -1,44 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import dummyImage from '../assets/dummyImage.jpeg';
-
-const products = [
-  {
-    id: 1,
-    title: "BASEBALL CAP - RED",
-    price: "₹1,999.00",
-    image: dummyImage,
-    gridClass: "col-span-2 md:col-span-3 h-52 sm:h-72 md:h-[400px]"
-  },
-  {
-    id: 2,
-    title: "BASEBALL CAP - RED",
-    price: "₹1,999.00",
-    image: dummyImage,
-    gridClass: "col-span-1 md:col-span-2 h-44 sm:h-60 md:h-[300px]"
-  },
-  {
-    id: 3,
-    title: "MADNESS CAP - BLK",
-    price: "₹1,899.00",
-    image: dummyImage,
-    gridClass: "col-span-1 row-span-2 h-[368px] sm:h-[504px] md:h-[624px]"
-  },
-  {
-    id: 4,
-    title: "BASEBALL CAP - RED",
-    price: "₹1,999.00",
-    image: dummyImage,
-    gridClass: "col-span-1 md:col-span-2 h-44 sm:h-60 md:h-[300px]"
-  },
-  {
-    id: 5,
-    title: "BASEBALL CAP - RED",
-    price: "₹1,999.00",
-    image: dummyImage,
-    gridClass: "col-span-2 md:col-span-3 h-52 sm:h-72 md:h-[450px]"
-  }
-];
+import { useProducts } from '../context/ProductsContext';
 
 const ProductGrid = ({ 
   cartItems, 
@@ -48,6 +10,7 @@ const ProductGrid = ({
   onProductClick
 }) => {
   const navigate = useNavigate();
+  const { products, loading, error } = useProducts();
   const [wishlistAlert, setWishlistAlert] = useState(null);
   const [cartAlert, setCartAlert] = useState(null);
 
@@ -117,8 +80,23 @@ const ProductGrid = ({
 
       {/* Grid Container */}
       <div className="max-w-7xl w-full mx-auto">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <svg className="w-10 h-10 text-neutral-700 mb-4 animate-spin" fill="none" viewBox="0 0 24 24"><path className="opacity-25" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+            <p className="text-sm font-mono font-bold tracking-wider text-neutral-500 uppercase">Loading products...</p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <p className="text-sm font-mono font-bold tracking-wider text-red-500 uppercase">{error}</p>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <svg className="w-12 h-12 text-neutral-700 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+            <p className="text-sm font-mono font-bold tracking-wider text-neutral-500 uppercase">No products available yet</p>
+          </div>
+        ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 auto-rows-max">
-          {products.map((product) => {
+          {products.map((product, index) => {
             const isWishlisted = wishlistedIds.includes(product.id);
 
             return (
@@ -132,14 +110,18 @@ const ProductGrid = ({
                   }
                 }}
                 data-aos="fade-up"
-                data-aos-delay={product.id * 100}
+                data-aos-delay={(index % 6) * 100}
                 className={`relative rounded-2xl md:rounded-3xl overflow-hidden group border border-neutral-900 shadow-xl bg-[#141414] cursor-pointer transition-all duration-500 ${product.gridClass}`}
               >
-                <img 
-                  src={product.image} 
-                  alt={product.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
+                {product.image ? (
+                  <img 
+                    src={product.image} 
+                    alt={product.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#1a1a1a]" />
+                )}
 
                 <button 
                   onClick={(e) => {
@@ -180,6 +162,7 @@ const ProductGrid = ({
             );
           })}
         </div>
+        )}
       </div>
     </section>
   );

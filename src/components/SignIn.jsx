@@ -1,16 +1,35 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
-import { IoEyeOutline, IoEyeOffOutline, IoCheckmarkSquare } from 'react-icons/io5';
+import { IoEyeOutline, IoEyeOffOutline, IoCheckbox } from 'react-icons/io5';
+import { useAuth } from '../context/AuthContext';
 
 const SignIn = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('parthbhalala@example.com');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ email, password, rememberMe });
+    setError('');
+    setLoading(true);
+    try {
+      const result = await login(email, password);
+      if (result && result.success) {
+        navigate('/profile', { replace: true });
+      } else {
+        setError(result?.message || 'Invalid email or password.');
+      }
+    } catch (err) {
+      setError(err.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -90,7 +109,7 @@ const SignIn = () => {
                 onChange={() => setRememberMe(!rememberMe)}
                 className="hidden"
               />
-              <IoCheckmarkSquare 
+              <IoCheckbox 
                 className={`text-sm ${rememberMe ? 'text-neutral-300' : 'text-neutral-700'}`} 
               />
               <span>Remember Me</span>
@@ -98,20 +117,26 @@ const SignIn = () => {
 
             <button
               type="button"
+              onClick={() => navigate('/forgot-password')}
               className="hover:text-neutral-200 transition"
             >
               Forgot Password?
             </button>
           </div>
 
+          {error && (
+            <p className="text-red-500 text-[11px] tracking-wide">{error}</p>
+          )}
+
           {/* Action Buttons */}
           <div className="space-y-3 pt-3">
             {/* Primary Sign In Button */}
             <button
               type="submit"
-              className="w-full bg-[#5a5a5a] hover:bg-[#6e6e6e] text-neutral-200 text-xs font-semibold tracking-widest py-3 rounded-full uppercase transition active:scale-[0.98]"
+              disabled={loading}
+              className="w-full bg-[#5a5a5a] hover:bg-[#6e6e6e] disabled:opacity-60 text-neutral-200 text-xs font-semibold tracking-widest py-3 rounded-full uppercase transition active:scale-[0.98]"
             >
-              SIGN IN
+              {loading ? 'SIGNING IN...' : 'SIGN IN'}
             </button>
 
             {/* Google Sign In Button */}
@@ -129,6 +154,7 @@ const SignIn = () => {
             Don't have an account?{' '}
             <button
               type="button"
+              onClick={() => navigate('/signup')}
               className="text-neutral-400 hover:text-white transition font-medium underline"
             >
               Register

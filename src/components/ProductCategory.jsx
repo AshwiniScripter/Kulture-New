@@ -14,6 +14,9 @@ const COLOR_HEX_MAP = {
 const ProductCategory = ({ 
   title, 
   products = [], 
+  loading = false, 
+  error = null,
+  onRetry = null,
   cartItems = [], 
   setCartItems, 
   wishlistedIds = [], 
@@ -351,7 +354,21 @@ const ProductCategory = ({
       {/* Grid */}
       <section className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl w-full mx-auto">
-          {filteredProducts.length === 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <svg className="w-10 h-10 text-neutral-700 mb-4 animate-spin" fill="none" viewBox="0 0 24 24"><path className="opacity-25" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+              <p className="text-sm font-mono font-bold tracking-wider text-neutral-500 uppercase">Loading products...</p>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <p className="text-sm font-mono font-bold tracking-wider text-red-500 uppercase">{error}</p>
+              {onRetry && (
+                <button onClick={onRetry} className="mt-3 text-xs font-mono font-bold tracking-wider text-neutral-300 hover:text-neutral-400 transition uppercase cursor-pointer">
+                  Try Again
+                </button>
+              )}
+            </div>
+          ) : filteredProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20">
               <svg className="w-12 h-12 text-neutral-700 mb-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
               <p className="text-sm font-mono font-bold tracking-wider text-neutral-500 uppercase">No products match your filters</p>
@@ -361,11 +378,15 @@ const ProductCategory = ({
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 auto-rows-max">
-              {filteredProducts.map((product) => {
+              {filteredProducts.map((product, index) => {
                 const isWishlisted = wishlistedIds.includes(product.id);
                 return (
-                  <div key={product.id} onClick={() => navigate(`/product/${product.id}`)} data-aos="fade-up" data-aos-delay={(product.id % 6) * 100} className={`relative rounded-2xl md:rounded-3xl overflow-hidden group border border-neutral-900 shadow-xl bg-[#141414] transition-all duration-500 cursor-pointer ${product.gridClass}`}>
-                    <img src={product.image} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                  <div key={product.id} onClick={() => navigate(`/product/${product.id}`)} data-aos="fade-up" data-aos-delay={(index % 6) * 100} className={`relative rounded-2xl md:rounded-3xl overflow-hidden group border border-neutral-900 shadow-xl bg-[#141414] transition-all duration-500 cursor-pointer ${product.gridClass}`}>
+                    {product.image ? (
+                      <img src={product.image} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                    ) : (
+                      <div className="w-full h-full bg-[#1a1a1a]" />
+                    )}
                     <button onClick={(e) => { e.stopPropagation(); triggerWishlist(product); }} className="absolute top-3 right-3 w-8 h-8 md:w-10 md:h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black/70 transition-all z-10 cursor-pointer">
                       <svg className={`w-4 h-4 transition-colors duration-300 ${isWishlisted ? 'text-neutral-300 fill-current scale-110' : 'text-white'}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                     </button>

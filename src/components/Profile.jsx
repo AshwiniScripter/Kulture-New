@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   IoPencil, 
@@ -20,24 +20,45 @@ import {
   IoReloadOutline,
   IoChevronBack
 } from "react-icons/io5";
+import { useAuth } from '../context/AuthContext';
+import orderService from '../services/orderService';
 
-// CONFIGURATION: Replace with your actual backend API & WebSocket URLs
-const API_BASE_URL = "https://api.yourdomain.com"; // e.g. http://localhost:5000/api
-const WS_BASE_URL = "wss://api.yourdomain.com/ws"; // WebSocket endpoint
+const buildTrackingOrders = (apiOrders) =>
+  (apiOrders || []).map((o) => {
+    const firstItem = (o.items && o.items[0]) || {};
+    return {
+      id: o.order_id || o.name,
+      item: firstItem.product_name || 'Order',
+      size: firstItem.size || '—',
+      price: `₹${Number(o.grand_total ?? o.sub_total ?? 0).toLocaleString('en-IN')}`,
+      image: firstItem.image || null,
+      status: o.status || 'Submitted',
+      paymentStatus: o.payment_status || 'Pending',
+      orderDate: o.order_date,
+      address: o.shipping_address || '—',
+      estimatedDelivery: '—',
+      steps: [
+        { label: 'Order Placed', date: o.order_date || '—', completed: true },
+        { label: 'Confirmed', date: '—', completed: true },
+        { label: 'In Progress', date: '—', completed: false, active: true },
+        { label: 'Delivered', date: '—', completed: false }
+      ]
+    };
+  });
 
 const Profile = () => {
   const navigate = useNavigate();
-  const socketRef = useRef(null);
+  const { user, refreshProfile, logout } = useAuth();
 
-  const [user, setUser] = useState({
-    name: "Parth Bhalala",
-    username: "@parth.vibes",
+  const [profileUser, setProfileUser] = useState({
+    name: user?.full_name || user?.name || 'Kulture Member',
+    username: `@${(user?.full_name || 'kulture').toLowerCase().replace(/\s+/g, '.')}`,
     bio: "Streetwear lover. Culture believer. Always evolving.",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
   });
 
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(user);
+  const [formData, setFormData] = useState(profileUser);
 
   // Modal Views State
   const [activeModal, setActiveModal] = useState(null); // 'personal' | 'password' | 'notifications' | 'track' | 'support' | null
@@ -50,10 +71,10 @@ const Profile = () => {
 
   // Extended Profile State
   const [personalDetails, setPersonalDetails] = useState({
-    firstName: "Parth",
-    lastName: "Bhalala",
-    email: "parth.bhalala@example.com",
-    phone: "+91 98765 43210"
+    firstName: user?.full_name?.split(' ')[0] || "Parth",
+    lastName: user?.full_name?.split(' ').slice(1).join(' ') || "Bhalala",
+    email: user?.email || "parth.bhalala@example.com",
+    phone: user?.phone || "+91 98765 43210"
   });
 
   const [notifications, setNotifications] = useState({
@@ -64,80 +85,37 @@ const Profile = () => {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    const saved = localStorage.getItem("kv_user_profile");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setUser(prev => ({ ...prev, ...parsed }));
-        setFormData(prev => ({ ...prev, ...parsed }));
-      } catch (e) {
-        console.error("Error loading profile", e);
+    refreshProfile().then((profile) => {
+      if (profile) {
+        setProfileUser((prev) => ({
+          ...prev,
+          name: profile.full_name || profile.name || prev.name,
+          username: `@${(profile.full_name || 'kulture').toLowerCase().replace(/\s+/g, '.')}`,
+        }));
+        setPersonalDetails((prev) => ({
+          ...prev,
+          firstName: profile.full_name?.split(' ')[0] || prev.firstName,
+          lastName: profile.full_name?.split(' ').slice(1).join(' ') || prev.lastName,
+          email: profile.email || prev.email,
+          phone: profile.phone || prev.phone,
+        }));
       }
-    }
-
-    // Fetch initial order history from backend
+    });
     fetchUserOrders();
-
-    // Setup Real-time WebSockets for Live Status Updates
-    setupWebSocket();
-
-    return () => {
-      if (socketRef.current) socketRef.current.close();
-    };
   }, []);
 
   // 1. BACKEND API: Fetch User Orders
   const fetchUserOrders = async () => {
     setLoadingOrders(true);
     try {
-      const token = localStorage.getItem("token"); // Auth Token
-      const res = await fetch(`${API_BASE_URL}/orders`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setOrders(data);
-      } else {
-        // Fallback Mock Data for Development Preview
-        setOrders(getMockOrders());
-      }
+      const email = user?.email;
+      const data = await orderService.getUserOrders(email || undefined);
+      setOrders(buildTrackingOrders(data));
     } catch (err) {
-      console.warn("Backend unavailable, loading mock order data.");
-      setOrders(getMockOrders());
+      console.warn("Could not fetch orders:", err.message);
+      setOrders([]);
     } finally {
       setLoadingOrders(false);
-    }
-  };
-
-  // 2. REAL-TIME: Setup WebSocket Listener for Order Updates
-  const setupWebSocket = () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      socketRef.current = new WebSocket(`${WS_BASE_URL}?token=${token}`);
-
-      socketRef.current.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-
-        // Event: Order status changed from backend
-        if (message.type === "ORDER_STATUS_UPDATE") {
-          const updatedOrder = message.payload;
-          
-          setOrders(prevOrders => 
-            prevOrders.map(ord => ord.id === updatedOrder.id ? updatedOrder : ord)
-          );
-
-          if (selectedOrder && selectedOrder.id === updatedOrder.id) {
-            setSelectedOrder(updatedOrder);
-          }
-
-          showToast(`Order #${updatedOrder.id} status updated!`);
-        }
-      };
-    } catch (e) {
-      console.error("WebSocket connection failed:", e);
     }
   };
 
@@ -148,7 +126,7 @@ const Profile = () => {
 
   const handleSaveProfile = (e) => {
     e.preventDefault();
-    setUser(formData);
+    setProfileUser(formData);
     localStorage.setItem("kv_user_profile", JSON.stringify(formData));
     setIsEditing(false);
     showToast("Profile header updated!");
@@ -156,7 +134,7 @@ const Profile = () => {
 
   const handleSavePersonalInfo = (e) => {
     e.preventDefault();
-    setUser(prev => ({ ...prev, name: `${personalDetails.firstName} ${personalDetails.lastName}` }));
+    setProfileUser(prev => ({ ...prev, name: `${personalDetails.firstName} ${personalDetails.lastName}` }));
     setActiveModal(null);
     showToast("Personal information saved!");
   };
@@ -210,26 +188,26 @@ const Profile = () => {
           <div className="flex items-start gap-4 mb-6">
             <div className="relative shrink-0">
               <img
-                src={user.avatar}
-                alt={user.name}
+                src={profileUser.avatar}
+                alt={profileUser.name}
                 className="w-20 h-20 rounded-full object-cover border-2 border-neutral-700/80 shadow-md"
               />
             </div>
 
             <div className="flex-1 min-w-0 pt-0.5">
               <h2 className="text-lg font-bold text-white tracking-wide truncate">
-                {user.name}
+                {profileUser.name}
               </h2>
               <p className="text-xs text-neutral-500 font-mono mb-2">
-                {user.username}
+                {profileUser.username}
               </p>
               <p className="text-xs text-neutral-400 leading-relaxed line-clamp-2">
-                {user.bio}
+                {profileUser.bio}
               </p>
 
               <button
                 onClick={() => {
-                  setFormData(user);
+                  setFormData(profileUser);
                   setIsEditing(true);
                 }}
                 className="mt-3 inline-flex items-center gap-1.5 bg-[#1a1a1a] hover:bg-neutral-800 border border-neutral-700/60 px-3 py-1.5 rounded-lg text-[11px] font-medium text-neutral-300 transition active:scale-95 cursor-pointer"
@@ -313,8 +291,7 @@ const Profile = () => {
 
           <button
             onClick={() => {
-              localStorage.removeItem("kv_user_profile");
-              localStorage.removeItem("token");
+              logout();
               navigate("/login");
             }}
             className="w-full flex items-center justify-center gap-2 bg-[#181818] hover:bg-red-900/20 hover:border-red-600/40 border border-neutral-800 py-3 rounded-xl text-xs font-bold text-neutral-300 hover:text-red-400 transition cursor-pointer"
@@ -705,39 +682,5 @@ const Profile = () => {
     </div>
   );
 };
-
-// Fallback Mock Data Structure for standard API format
-const getMockOrders = () => [
-  {
-    id: "KV-9823411",
-    item: "Oversized Vintage Graphic Tee",
-    size: "L",
-    price: "₹1,999",
-    image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&q=80&w=300",
-    estimatedDelivery: "Mon, 28 Oct",
-    address: "102, Culture Heights, MG Road, Pune, 411001",
-    steps: [
-      { label: "Order Placed", date: "24 Oct, 02:30 PM", completed: true },
-      { label: "Packed & Dispatched", date: "25 Oct, 10:15 AM", completed: true },
-      { label: "Out for Delivery", date: "Expected 28 Oct", completed: false, active: true },
-      { label: "Delivered", date: "Expected 28 Oct", completed: false }
-    ]
-  },
-  {
-    id: "KV-8812304",
-    item: "Retro Washed Denim Jacket",
-    size: "M",
-    price: "₹4,499",
-    image: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&q=80&w=300",
-    estimatedDelivery: "Delivered on 12 Oct",
-    address: "102, Culture Heights, MG Road, Pune, 411001",
-    steps: [
-      { label: "Order Placed", date: "10 Oct, 11:00 AM", completed: true },
-      { label: "Packed & Dispatched", date: "11 Oct, 04:00 PM", completed: true },
-      { label: "Out for Delivery", date: "12 Oct, 09:00 AM", completed: true },
-      { label: "Delivered", date: "12 Oct, 02:15 PM", completed: true }
-    ]
-  }
-];
 
 export default Profile;

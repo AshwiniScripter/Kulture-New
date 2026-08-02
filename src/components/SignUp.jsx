@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 import { IoChevronBack, IoCheckmark, IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
+import { useAuth } from '../context/AuthContext';
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -17,15 +19,42 @@ const SignUp = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form Data:', formData);
+    setError('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await register({
+        full_name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phoneNumber,
+      });
+
+      if (result && result.success) {
+        navigate('/profile', { replace: true });
+      } else {
+        setError(result?.message || 'Account creation failed.');
+      }
+    } catch (err) {
+      setError(err.message || 'Account creation failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -154,14 +183,19 @@ const SignUp = () => {
               </div>
             </div>
 
+            {error && (
+              <p className="text-red-500 text-[11px] tracking-wide">{error}</p>
+            )}
+
             {/* Action Buttons */}
             <div className="space-y-3 pt-6">
               {/* Primary Sign In / Sign Up Button */}
               <button
                 type="submit"
-                className="w-full bg-[#5a5a5a] hover:bg-[#6e6e6e] text-neutral-200 text-xs font-semibold tracking-widest py-3 rounded-full uppercase transition active:scale-[0.98]"
+                disabled={loading}
+                className="w-full bg-[#5a5a5a] hover:bg-[#6e6e6e] disabled:opacity-60 text-neutral-200 text-xs font-semibold tracking-widest py-3 rounded-full uppercase transition active:scale-[0.98]"
               >
-                SIGN IN
+                {loading ? 'CREATING ACCOUNT...' : 'SIGN UP'}
               </button>
 
               {/* Google Sign In Button */}

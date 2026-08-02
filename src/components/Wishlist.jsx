@@ -1,24 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoHeart, IoBagOutline } from 'react-icons/io5';
-import dummyImage from '../assets/Category/tshirt.png'; 
+import { useProducts } from '../context/ProductsContext';
 
 const Wishlist = ({ wishlistedIds = [], setWishlistedIds, cartItems = [], setCartItems }) => {
   const navigate = useNavigate();
+  const { getById } = useProducts();
 
-  // Dynamic mapper safely parsing primitives or fully hydrated objects
-  const wishlistedProducts = wishlistedIds.map((item) => {
-    if (typeof item === 'object' && item !== null) return item;
-    return {
-      id: item,
-      title: "DESIGNER T SHIRT",
-      price: 1999,
-      discount: "29% OFF",
-      image: dummyImage,
-      color: "Black",
-      size: "XL"
-    };
-  });
+  const wishlistedProducts = wishlistedIds
+    .map((item) => {
+      if (typeof item === 'object' && item !== null) return item;
+      return getById(item);
+    })
+    .filter(Boolean);
 
   const removeFromWishlist = (idToRemove) => {
     setWishlistedIds(wishlistedIds.filter(item => {
@@ -27,35 +21,33 @@ const Wishlist = ({ wishlistedIds = [], setWishlistedIds, cartItems = [], setCar
     }));
   };
 
+  const buildCartItem = (product) => ({
+    id: product.id,
+    title: product.title,
+    price: typeof product.price === 'number' ? `₹${product.price.toLocaleString('en-IN')}` : product.price,
+    priceNum: product.priceNum || product.finalPrice,
+    image: product.image,
+    color: product.colors?.[0] || 'Black',
+    size: product.sizeNames?.[0] || product.size || 'One Size',
+    quantity: 1
+  });
+
   const handleAddToCart = (product) => {
-    const cartProduct = {
-      id: `${product.id}-${product.color || 'Black'}-${product.size || 'XL'}`,
-      title: product.title,
-      price: typeof product.price === 'number' ? `₹${product.price.toLocaleString('en-IN')}` : product.price,
-      image: product.image,
-      color: product.color || 'Black',
-      size: product.size || 'XL',
-      quantity: 1
-    };
+    const cartProduct = buildCartItem(product);
     setCartItems([...cartItems, cartProduct]);
     removeFromWishlist(product.id);
   };
 
   const handleAddAllToCart = () => {
-    const newItems = wishlistedProducts.map(product => ({
-      id: `${product.id}-${product.color || 'Black'}-${product.size || 'XL'}`,
-      title: product.title,
-      price: typeof product.price === 'number' ? `₹${product.price.toLocaleString('en-IN')}` : product.price,
-      image: product.image,
-      color: product.color || 'Black',
-      size: product.size || 'XL',
-      quantity: 1
-    }));
+    const newItems = wishlistedProducts.map(buildCartItem);
     setCartItems([...cartItems, ...newItems]);
     setWishlistedIds([]);
   };
 
-  const totalSum = wishlistedProducts.reduce((sum, item) => sum + (item.price || 1999), 0);
+  const totalSum = wishlistedProducts.reduce(
+    (sum, item) => sum + (item.priceNum || item.finalPrice || Number(item.price?.replace?.(/[^\d.]/g, '')) || 1999),
+    0
+  );
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-neutral-400 font-mono selection:bg-neutral-800 flex flex-col pt-24 pb-8 px-4 sm:px-8 md:px-12">
@@ -88,11 +80,15 @@ const Wishlist = ({ wishlistedIds = [], setWishlistedIds, cartItems = [], setCar
                   
                   {/* Product Image Box */}
                   <div className="w-[45%] sm:w-[50%] relative bg-[#0e0e0e] border border-[#161616] rounded-xl overflow-hidden aspect-square shrink-0">
-                    <img 
-                      src={product.image} 
-                      alt={product.title} 
-                      className="w-full h-full object-cover opacity-90" 
-                    />
+                    {product.image ? (
+                      <img 
+                        src={product.image} 
+                        alt={product.title} 
+                        className="w-full h-full object-cover opacity-90" 
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-[#1a1a1a]" />
+                    )}
                     {idx === 0 && (
                       <span className="absolute top-2 left-2 text-[8px] sm:text-[9px] font-sans font-extrabold text-black bg-white px-1.5 py-0.5 rounded tracking-wide">
                         NEW
@@ -113,14 +109,16 @@ const Wishlist = ({ wishlistedIds = [], setWishlistedIds, cartItems = [], setCar
                         {product.title}
                       </h3>
                       <p className="text-[10px] text-neutral-600 tracking-wide mt-0.5">
-                        {product.color || 'Black'} . {product.size || 'XL'}
+                        {product.colors?.[0] || 'Black'} . {product.sizeNames?.[0] || 'One Size'}
                       </p>
                       <p className="text-neutral-300 font-bold text-sm sm:text-base mt-2 tracking-wide">
                         {typeof product.price === 'number' ? `₹${product.price.toLocaleString('en-IN')}` : product.price}
                       </p>
-                      <p className="text-[10px] text-neutral-500 tracking-wider mt-0.5">
-                        {product.discount || '29% OFF'}
-                      </p>
+                      {product.discount > 0 && (
+                        <p className="text-[10px] text-neutral-500 tracking-wider mt-0.5">
+                          {product.discount}% OFF
+                        </p>
+                      )}
                     </div>
 
                     <button 

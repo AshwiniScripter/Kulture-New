@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 
+import { AuthProvider } from "./context/AuthContext";
+import { ProductsProvider } from "./context/ProductsContext";
+
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import MarqueeBanner from "./components/MarqueeBanner";
@@ -25,6 +28,9 @@ import Watches from "./components/Watches";
 import NewArrival from "./components/NewArrival";
 import Profile from "./components/Profile"; 
 import Addresses from "./components/Addresses";
+import SignIn from "./components/SignIn";
+import SignUp from "./components/SignUp";
+import ForgotPassword from "./components/ForgotPassword";
 
 // FAQ Bot Component
 import FAQBot from "./components/FAQBot"; 
@@ -75,32 +81,39 @@ function App() {
   );
 
   return (
-    <BrowserRouter basename="/kulture-vintage">
-      {/* Forces viewport jump to top on navigation */}
-      <ScrollToTopSystem />
+    <AuthProvider>
+      <ProductsProvider>
+        <BrowserRouter basename="/kulture-vintage">
+          {/* Forces viewport jump to top on navigation */}
+          <ScrollToTopSystem />
 
-      <div className="bg-[#0f0f0f] min-h-screen text-white relative flex flex-col justify-between">
-        <div>
-          {/* Global Navigation Bar */}
-          <Navbar
-            cartCount={totalCartCount}
-            wishlistCount={wishlistedIds.length} 
-            onCartClick={() => setIsCartOpen(true)}
-          />
+          <div className="bg-[#0f0f0f] min-h-screen text-white relative flex flex-col justify-between">
+            <div>
+              {/* Global Navigation Bar */}
+              <Navbar
+                cartCount={totalCartCount}
+                wishlistCount={wishlistedIds.length} 
+                onCartClick={() => setIsCartOpen(true)}
+              />
 
-          {/* Client Side View Routes */}
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Home
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
-                  wishlistedIds={wishlistedIds}
-                  setWishlistedIds={setWishlistedIds}
+              {/* Client Side View Routes */}
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <Home
+                      cartItems={cartItems}
+                      setCartItems={setCartItems}
+                      wishlistedIds={wishlistedIds}
+                      setWishlistedIds={setWishlistedIds}
+                    />
+                  }
                 />
-              }
-            />
+
+                {/* AUTHENTICATION VIEW ROUTES */}
+                <Route path="/login" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
 
             {/* ABOUT US VIEW ROUTE */}
             <Route path="/about" element={<About />} />
@@ -126,6 +139,7 @@ function App() {
                   setCartItems={setCartItems}
                   wishlistedIds={wishlistedIds}
                   setWishlistedIds={setWishlistedIds}
+                  onCartOpen={() => setIsCartOpen(true)}
                 />
               }
             />
@@ -275,7 +289,9 @@ function App() {
         {/* Global Footer */}
         <Footer />
       </div>
-    </BrowserRouter>
+      </BrowserRouter>
+      </ProductsProvider>
+    </AuthProvider>
   );
 }
 
