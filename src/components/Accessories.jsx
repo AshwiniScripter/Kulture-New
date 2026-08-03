@@ -22,16 +22,22 @@ const Accessories = () => {
         {/* Header */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate("/categories")}
+            onClick={() => navigate("/")} // Redirects to Home page
             className="bg-black/80 border border-neutral-900 p-3.5 rounded-xl hover:bg-neutral-900 text-neutral-300 transition duration-300 cursor-pointer active:scale-95 shrink-0"
+            aria-label="Go back to Home"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
           </button>
+          
           <div className="bg-black/80 border border-neutral-900 flex-1 rounded-xl py-3.5 flex justify-center items-center shadow-md">
             <h1 className="text-2xl md:text-3xl font-mono font-black tracking-widest text-neutral-300 uppercase">
               ACCESSORIES
             </h1>
           </div>
+          
+          {/* Spacer to keep title centered */}
           <div className="w-14 shrink-0" />
         </div>
 
