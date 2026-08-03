@@ -17,9 +17,17 @@ import ProductDetail from "./components/ProductDetail";
 import ProductDetailView from "./components/ProductDetailView"; 
 import Wishlist from "./components/Wishlist"; 
 import Footer from "./components/Footer";
-import About from "./components/About"; // <-- Added About import
+import About from "./components/About";
 
+// Catalogue & Subcategory Imports
+import Upperwear from "./components/Upperwear";
+import Jackets from "./components/Jackets";
+import Sweatshirts from "./components/Sweatshirts";
+import Hoodies from "./components/Hoodies";
+import Tanks from "./components/Tanks";
+import Shirts from "./components/Shirts";
 import Tshirt from "./components/Tshirt"; 
+
 import Shoes from "./components/Shoes";
 import Pants from "./components/Pants";
 import Accessories from "./components/Accessories";
@@ -48,9 +56,6 @@ function ScrollToTopSystem() {
   return null;
 }
 
-
-// Derive the router basename from the deployment subpath so the app works
-// under any GitHub Pages / hosted project path (e.g. /Kulture-New or /kulture-vintage).
 const getAppBasename = () => {
   const segment = window.location.pathname.split('/').filter(Boolean)[0];
   if (segment && import.meta.env.BASE_URL && import.meta.env.BASE_URL !== '/') {
@@ -94,32 +99,32 @@ function AppContent() {
       <ScrollToTopSystem />
 
       <div className="bg-[#0f0f0f] min-h-screen text-white relative flex flex-col justify-between">
-            <div>
-              {/* Global Navigation Bar */}
-              <Navbar
-                cartCount={totalCount}
-                wishlistCount={wishlist.length} 
-                onCartClick={() => setIsCartOpen(true)}
-              />
+        <div>
+          {/* Global Navigation Bar */}
+          <Navbar
+            cartCount={totalCount}
+            wishlistCount={wishlist.length} 
+            onCartClick={() => setIsCartOpen(true)}
+          />
 
-              {/* Client Side View Routes */}
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <Home
-                      cartItems={cart}
-                      setCartItems={setCart}
-                      wishlist={wishlist}
-                      setWishlist={setWishlist}
-                    />
-                  }
+          {/* Client Side View Routes */}
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <Home
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlist={wishlist}
+                  setWishlist={setWishlist}
                 />
+              }
+            />
 
-                {/* AUTHENTICATION VIEW ROUTES */}
-                <Route path="/login" element={<SignIn />} />
-                <Route path="/signup" element={<SignUp />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
+            {/* AUTHENTICATION VIEW ROUTES */}
+            <Route path="/login" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
 
             {/* ABOUT US VIEW ROUTE */}
             <Route path="/about" element={<About />} />
@@ -182,7 +187,86 @@ function AppContent() {
             {/* ADDRESSES MANAGEMENT VIEW */}
             <Route path="/addresses" element={<Addresses />} />
 
-            {/* Dedicated Catalogue View Routes */}
+            {/* UPPERWEAR MAIN LANDING & SUBCATEGORY ROUTES */}
+            <Route
+              path="/upperwear"
+              element={
+                <Upperwear
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+            <Route
+              path="/upperwear/jackets"
+              element={
+                <Jackets
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+            <Route
+              path="/upperwear/sweatshirts"
+              element={
+                <Sweatshirts
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+            <Route
+              path="/upperwear/hoodies"
+              element={
+                <Hoodies
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+            <Route
+              path="/upperwear/tanks"
+              element={
+                <Tanks
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+            <Route
+              path="/upperwear/shirts"
+              element={
+                <Shirts
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+            <Route
+              path="/upperwear/tshirts"
+              element={
+                <Tshirt
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+
+            {/* Top-level /tshirts route alias */}
             <Route
               path="/tshirts"
               element={
@@ -195,6 +279,7 @@ function AppContent() {
               }
             />
 
+            {/* OTHER CATEGORIES */}
             <Route
               path="/shoes"
               element={

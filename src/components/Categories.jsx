@@ -12,7 +12,7 @@ const Categories = () => {
   const handleCategoryClick = (categoryName) => {
     switch (categoryName) {
       case "tshirts":
-        navigate("/tshirts");
+        navigate("/upperwear");
         break;
       case "shoes":
         navigate("/shoes");
