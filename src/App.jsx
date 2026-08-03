@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 import { AuthProvider } from "./context/AuthContext";
+import { WishlistProvider, useWishlist } from "./context/WishlistContext";
+import { CartProvider, useCart } from "./context/CartContext";
 import { ProductsProvider } from "./context/ProductsContext";
 
 import Navbar from "./components/Navbar";
@@ -47,12 +49,23 @@ function ScrollToTopSystem() {
 }
 
 
+// Derive the router basename from the deployment subpath so the app works
+// under any GitHub Pages / hosted project path (e.g. /Kulture-New or /kulture-vintage).
+const getAppBasename = () => {
+  const segment = window.location.pathname.split('/').filter(Boolean)[0];
+  if (segment && import.meta.env.BASE_URL && import.meta.env.BASE_URL !== '/') {
+    return import.meta.env.BASE_URL.replace(/\/+$/, '');
+  }
+  return segment ? `/${segment}` : '';
+};
+const APP_BASENAME = getAppBasename();
+
 // 1. Unified Home View Layout
 function Home({
   cartItems,
   setCartItems,
-  wishlistedIds,
-  setWishlistedIds,
+  wishlist,
+  setWishlist,
 }) {
   return (
     <div>
@@ -62,37 +75,30 @@ function Home({
       <ProductGrid
         cartItems={cartItems}
         setCartItems={setCartItems}
-        wishlistedIds={wishlistedIds}
-        setWishlistedIds={setWishlistedIds}
+        wishlistedIds={wishlist}
+        setWishlistedIds={setWishlist}
       />
     </div>
   );
 }
 
 // 2. Main Application Wrapper & Controller
-function App() {
-  const [cartItems, setCartItems] = useState([]);
+function AppContent() {
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [wishlistedIds, setWishlistedIds] = useState([]);
-
-  const totalCartCount = cartItems.reduce(
-    (acc, item) => acc + (item.quantity || 1),
-    0
-  );
+  const { wishlist, setWishlist } = useWishlist();
+  const { cart, setCart, totalCount } = useCart();
 
   return (
-    <AuthProvider>
-      <ProductsProvider>
-        <BrowserRouter basename="/Kulture-New">
-          {/* Forces viewport jump to top on navigation */}
-          <ScrollToTopSystem />
+    <>
+      {/* Forces viewport jump to top on navigation */}
+      <ScrollToTopSystem />
 
-          <div className="bg-[#0f0f0f] min-h-screen text-white relative flex flex-col justify-between">
+      <div className="bg-[#0f0f0f] min-h-screen text-white relative flex flex-col justify-between">
             <div>
               {/* Global Navigation Bar */}
               <Navbar
-                cartCount={totalCartCount}
-                wishlistCount={wishlistedIds.length} 
+                cartCount={totalCount}
+                wishlistCount={wishlist.length} 
                 onCartClick={() => setIsCartOpen(true)}
               />
 
@@ -102,10 +108,10 @@ function App() {
                   path="/"
                   element={
                     <Home
-                      cartItems={cartItems}
-                      setCartItems={setCartItems}
-                      wishlistedIds={wishlistedIds}
-                      setWishlistedIds={setWishlistedIds}
+                      cartItems={cart}
+                      setCartItems={setCart}
+                      wishlist={wishlist}
+                      setWishlist={setWishlist}
                     />
                   }
                 />
@@ -122,10 +128,10 @@ function App() {
               path="/products"
               element={
                 <ProductDetail
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
-                  wishlistedIds={wishlistedIds}
-                  setWishlistedIds={setWishlistedIds}
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
                 />
               }
             />
@@ -135,10 +141,10 @@ function App() {
               path="/product/:id"
               element={
                 <ProductDetailView
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
-                  wishlistedIds={wishlistedIds}
-                  setWishlistedIds={setWishlistedIds}
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
                   onCartOpen={() => setIsCartOpen(true)}
                 />
               }
@@ -149,10 +155,10 @@ function App() {
               path="/wishlist" 
               element={
                 <Wishlist 
-                  wishlistedIds={wishlistedIds} 
-                  setWishlistedIds={setWishlistedIds}
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
+                  wishlistedIds={wishlist} 
+                  setWishlistedIds={setWishlist}
+                  cartItems={cart}
+                  setCartItems={setCart}
                 />
               } 
             />
@@ -162,16 +168,16 @@ function App() {
               path="/new-arrival"
               element={
                 <NewArrival
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
-                  wishlistedIds={wishlistedIds}
-                  setWishlistedIds={setWishlistedIds}
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
                 />
               }
             />
 
             {/* PROFILE VIEW */}
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<Profile wishlistedIds={wishlist} setWishlistedIds={setWishlist} />} />
 
             {/* ADDRESSES MANAGEMENT VIEW */}
             <Route path="/addresses" element={<Addresses />} />
@@ -181,10 +187,10 @@ function App() {
               path="/tshirts"
               element={
                 <Tshirt
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
-                  wishlistedIds={wishlistedIds}
-                  setWishlistedIds={setWishlistedIds}
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
                 />
               }
             />
@@ -193,10 +199,10 @@ function App() {
               path="/shoes"
               element={
                 <Shoes
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
-                  wishlistedIds={wishlistedIds}
-                  setWishlistedIds={setWishlistedIds}
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
                 />
               }
             />
@@ -205,10 +211,10 @@ function App() {
               path="/pants"
               element={
                 <Pants
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
-                  wishlistedIds={wishlistedIds}
-                  setWishlistedIds={setWishlistedIds}
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
                 />
               }
             />
@@ -217,10 +223,10 @@ function App() {
               path="/accessories"
               element={
                 <Accessories
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
-                  wishlistedIds={wishlistedIds}
-                  setWishlistedIds={setWishlistedIds}
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
                 />
               }
             />
@@ -229,10 +235,10 @@ function App() {
               path="/belts"
               element={
                 <Belts
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
-                  wishlistedIds={wishlistedIds}
-                  setWishlistedIds={setWishlistedIds}
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
                 />
               }
             />
@@ -241,10 +247,10 @@ function App() {
               path="/bandana"
               element={
                 <Bandana
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
-                  wishlistedIds={wishlistedIds}
-                  setWishlistedIds={setWishlistedIds}
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
                 />
               }
             />
@@ -253,10 +259,10 @@ function App() {
               path="/watches"
               element={
                 <Watches
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
-                  wishlistedIds={wishlistedIds}
-                  setWishlistedIds={setWishlistedIds}
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
                 />
               }
             />
@@ -265,10 +271,10 @@ function App() {
               path="/shades"
               element={
                 <Shades
-                  cartItems={cartItems}
-                  setCartItems={setCartItems}
-                  wishlistedIds={wishlistedIds}
-                  setWishlistedIds={setWishlistedIds}
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
                 />
               }
             />
@@ -279,8 +285,8 @@ function App() {
         <CartDrawer
           isOpen={isCartOpen}
           onClose={() => setIsCartOpen(false)}
-          cartItems={cartItems}
-          setCartItems={setCartItems}
+          cartItems={cart}
+          setCartItems={setCart}
         />
 
         {/* Global Floating FAQ Chatbot */}
@@ -289,8 +295,23 @@ function App() {
         {/* Global Footer */}
         <Footer />
       </div>
-      </BrowserRouter>
-      </ProductsProvider>
+    </>
+  );
+}
+
+// Wrap the app in all required providers and the router.
+function App() {
+  return (
+    <AuthProvider>
+      <WishlistProvider>
+        <CartProvider>
+          <ProductsProvider>
+            <BrowserRouter basename={APP_BASENAME}>
+              <AppContent />
+            </BrowserRouter>
+          </ProductsProvider>
+        </CartProvider>
+      </WishlistProvider>
     </AuthProvider>
   );
 }

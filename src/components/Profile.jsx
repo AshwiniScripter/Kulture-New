@@ -46,9 +46,9 @@ const buildTrackingOrders = (apiOrders) =>
     };
   });
 
-const Profile = () => {
+const Profile = ({ wishlistedIds = [] }) => {
   const navigate = useNavigate();
-  const { user, refreshProfile, logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const [profileUser, setProfileUser] = useState({
     name: user?.full_name || user?.name || 'Kulture Member',
@@ -71,10 +71,10 @@ const Profile = () => {
 
   // Extended Profile State
   const [personalDetails, setPersonalDetails] = useState({
-    firstName: user?.full_name?.split(' ')[0] || "Parth",
-    lastName: user?.full_name?.split(' ').slice(1).join(' ') || "Bhalala",
-    email: user?.email || "parth.bhalala@example.com",
-    phone: user?.phone || "+91 98765 43210"
+    firstName: user?.full_name?.split(' ')[0] || "",
+    lastName: user?.full_name?.split(' ').slice(1).join(' ') || "",
+    email: user?.email || "",
+    phone: user?.phone || ""
   });
 
   const [notifications, setNotifications] = useState({
@@ -83,26 +83,34 @@ const Profile = () => {
     securityAlerts: true
   });
 
+  // Dashboard stats (orders/wishlist come from live client state; coupons & K Points
+  // default to 0 until a backend stats endpoint is available)
+  const [stats, setStats] = useState({ coupons: 0, kPoints: 0 });
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    refreshProfile().then((profile) => {
-      if (profile) {
-        setProfileUser((prev) => ({
-          ...prev,
-          name: profile.full_name || profile.name || prev.name,
-          username: `@${(profile.full_name || 'kulture').toLowerCase().replace(/\s+/g, '.')}`,
-        }));
-        setPersonalDetails((prev) => ({
-          ...prev,
-          firstName: profile.full_name?.split(' ')[0] || prev.firstName,
-          lastName: profile.full_name?.split(' ').slice(1).join(' ') || prev.lastName,
-          email: profile.email || prev.email,
-          phone: profile.phone || prev.phone,
-        }));
-      }
-    });
+
+    const sessionEmail = user?.email;
+    if (!sessionEmail) {
+      setLoadingOrders(false);
+      return;
+    }
+
+    const displayName = user?.display_name || user?.name || user?.full_name;
+    setProfileUser((prev) => ({
+      ...prev,
+      name: displayName || prev.name,
+      username: `@${(displayName || 'kulture').toLowerCase().replace(/\s+/g, '.')}`,
+    }));
+    setPersonalDetails((prev) => ({
+      ...prev,
+      firstName: displayName?.split(' ')[0] || prev.firstName,
+      lastName: displayName?.split(' ').slice(1).join(' ') || prev.lastName,
+      email: user?.email || prev.email,
+      phone: user?.phone || prev.phone,
+    }));
     fetchUserOrders();
-  }, []);
+  }, [user?.email]);
 
   // 1. BACKEND API: Fetch User Orders
   const fetchUserOrders = async () => {
@@ -227,17 +235,17 @@ const Profile = () => {
             </div>
             <div className="space-y-1 border-l border-neutral-800/60">
               <IoHeartOutline className="mx-auto text-lg text-neutral-400" />
-              <p className="text-sm font-bold text-white font-mono">25</p>
+              <p className="text-sm font-bold text-white font-mono">{wishlistedIds.length}</p>
               <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Wishlist</p>
             </div>
             <div className="space-y-1 border-l border-neutral-800/60">
               <IoPricetagOutline className="mx-auto text-lg text-neutral-400" />
-              <p className="text-sm font-bold text-white font-mono">3</p>
+              <p className="text-sm font-bold text-white font-mono">{stats.coupons}</p>
               <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Coupons</p>
             </div>
             <div className="space-y-1 border-l border-neutral-800/60">
               <IoStarOutline className="mx-auto text-lg text-neutral-400" />
-              <p className="text-sm font-bold text-white font-mono">580</p>
+              <p className="text-sm font-bold text-white font-mono">{stats.kPoints}</p>
               <p className="text-[10px] text-neutral-500 uppercase tracking-wider">K Points</p>
             </div>
           </div>
@@ -294,9 +302,9 @@ const Profile = () => {
               logout();
               navigate("/login");
             }}
-            className="w-full flex items-center justify-center gap-2 bg-[#181818] hover:bg-red-900/20 hover:border-red-600/40 border border-neutral-800 py-3 rounded-xl text-xs font-bold text-neutral-300 hover:text-red-400 transition cursor-pointer"
+            className="group w-full flex items-center justify-center gap-2 bg-[#181818] hover:bg-red-900/20 hover:border-red-600/40 border border-neutral-800 py-3 rounded-xl text-xs font-bold text-neutral-300 hover:text-red-400 transition cursor-pointer"
           >
-            <IoLogOutOutline className="text-base" />
+            <IoLogOutOutline className="text-base group-hover:text-red-400 transition" />
             <span>Log Out</span>
           </button>
         </div>

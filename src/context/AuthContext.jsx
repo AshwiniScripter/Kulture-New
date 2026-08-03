@@ -9,10 +9,13 @@ const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
+    // Restore the session from localStorage so the user/profile survive a refresh.
+    // (Server-side re-validation is skipped because this backend 403s those auth
+    // endpoints even for valid/guest requests, which just produces log noise.)
+    const cached = localStorage.getItem(STORAGE_KEY);
+    if (cached) {
       try {
-        setUser(JSON.parse(saved));
+        setUser(JSON.parse(cached));
       } catch {
         localStorage.removeItem(STORAGE_KEY);
       }
@@ -28,12 +31,8 @@ const AuthProvider = ({ children }) => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(result.user));
         return result.user;
       }
-      setUser(null);
-      localStorage.removeItem(STORAGE_KEY);
       return null;
     } catch {
-      setUser(null);
-      localStorage.removeItem(STORAGE_KEY);
       return null;
     }
   }, []);

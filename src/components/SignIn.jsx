@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 import { IoEyeOutline, IoEyeOffOutline, IoCheckbox } from 'react-icons/io5';
 import { useAuth } from '../context/AuthContext';
+import signin from '../assets/sign-in.jpeg';
 
 const SignIn = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [email, setEmail] = useState('parthbhalala@example.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -33,27 +34,17 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center p-4 font-mono">
+    <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center p-4 pt-24 pb-12 font-mono">
       {/* Mobile Device Frame Container */}
-      <div className="w-full max-w-xs sm:max-w-sm bg-[#0d0d0d] border border-neutral-900 rounded-[40px] overflow-hidden shadow-2xl flex flex-col pb-8">
+      <div className="w-full max-w-xs sm:max-w-sm bg-[#0d0d0d] border border-neutral-900 rounded-[40px] overflow-hidden shadow-2xl flex flex-col pb-8 my-6">
         
-        {/* Status Bar Mockup */}
-        <div className="flex justify-between items-center px-6 pt-3 text-neutral-400 text-xs font-semibold select-none">
-          <span>9:41</span>
-          <div className="flex items-center gap-1 text-[10px]">
-            <span>􀁗</span> {/* Signal */}
-            <span>􀙇</span> {/* Wifi */}
-            <span>􀛨</span> {/* Battery */}
-          </div>
-        </div>
-
-        {/* Hero Image Header */}
-        <div className="px-3 pt-2">
-          <div className="relative w-full h-64 rounded-b-[40px] overflow-hidden">
+        {/* Hero Storefront Image Header */}
+        <div className="px-3 pt-3">
+          <div className="relative w-full h-72 rounded-t-[30px] rounded-b-[30px] overflow-hidden bg-black flex items-center justify-center">
             <img
-              src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=800"
-              alt="Friends smiling"
-              className="w-full h-full object-cover"
+              src={signin}
+              alt="Kulture Vintage Store Front"
+              className="w-full h-full object-contain rounded-t-[30px]"
             />
           </div>
         </div>
