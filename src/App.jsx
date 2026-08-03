@@ -28,6 +28,12 @@ import Tanks from "./components/Tanks";
 import Shirts from "./components/Shirts";
 import Tshirt from "./components/Tshirt"; 
 
+import Lowerwear from "./components/Lowerwear";
+import Jeans from "./components/Jeans";
+import Sweatpants from "./components/Sweatpants";
+import Jorts from "./components/Jorts";
+import LinerPants from "./components/LinerPants";
+
 import Shoes from "./components/Shoes";
 import Pants from "./components/Pants";
 import Accessories from "./components/Accessories";
@@ -271,6 +277,63 @@ function AppContent() {
               path="/tshirts"
               element={
                 <Tshirt
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+
+            {/* LOWERWEAR LANDING & SUBCATEGORY ROUTES */}
+            <Route
+              path="/lowerwear"
+              element={
+                <Lowerwear
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+            <Route
+              path="/jeans"
+              element={
+                <Jeans
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+            <Route
+              path="/sweatpants"
+              element={
+                <Sweatpants
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+            <Route
+              path="/jorts"
+              element={
+                <Jorts
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+            <Route
+              path="/liner-pants"
+              element={
+                <LinerPants
                   cartItems={cart}
                   setCartItems={setCart}
                   wishlistedIds={wishlist}

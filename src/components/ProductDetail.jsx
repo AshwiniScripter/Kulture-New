@@ -40,7 +40,7 @@ const ProductDetail = ({
       
               {/* Tshirt Card */}
               <div 
-                onClick={() => navigate('/tshirts')} 
+                onClick={() => navigate('/upperwear')} 
                 className="relative h-48 sm:h-112.5 lg:h-125 rounded-xl sm:rounded-2xl overflow-hidden group border border-neutral-900 shadow-lg cursor-pointer"
                 data-aos="fade-up" data-aos-delay="100"
               >

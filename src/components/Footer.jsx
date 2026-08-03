@@ -137,7 +137,7 @@ const Footer = () => {
           </h3>
           <ul className="space-y-2.5 text-xs">
             {[
-              { label: 'T-SHIRTS', path: '/tshirts' },
+              { label: 'UPPERWEAR', path: '/upperwear' },
               { label: 'SHOES', path: '/shoes' },
               { label: 'PANTS', path: '/pants' },
               { label: 'ACCESSORIES', path: '/accessories' },

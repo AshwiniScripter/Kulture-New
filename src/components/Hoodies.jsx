@@ -1,22 +1,17 @@
-import React, { useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCategory from './ProductCategory';
 import { useProducts } from '../context/ProductsContext';
 
 const Hoodies = (props) => {
   const navigate = useNavigate();
-  const { getByCategory, loading, error } = useProducts();
-  const baseProducts = getByCategory('upperwear') || [];
+  const { getByCategory, fetchByCategory, loading, error } = useProducts();
 
-  const products = useMemo(() => {
-    return baseProducts.filter((p) => {
-      const haystack = [p.subcategory, p.item_group, p.category, p.name, p.product_name, p.title]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return haystack.includes('hoodie');
-    });
-  }, [baseProducts]);
+  useEffect(() => {
+    fetchByCategory('upperwear', 'hoodies');
+  }, [fetchByCategory]);
+
+  const products = getByCategory('upperwear', 'hoodies');
 
   return (
     <div className="bg-[#0f0f0f] min-h-screen text-white px-3 md:px-6 pt-28 md:pt-32 pb-12">

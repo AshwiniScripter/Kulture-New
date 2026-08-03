@@ -1,46 +1,48 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCategory from './ProductCategory';
 import { useProducts } from '../context/ProductsContext';
 
 const CATEGORY = 'upperwear';
 
+const categoryImage = (file) => import.meta.env.BASE_URL + 'images/categories/' + file;
+
 const SUB_CATEGORIES = [
   {
     id: 'jackets',
     label: 'JACKETS',
     keywords: ['jacket'],
-    image: '/images/categories/jackets.jpg',
+    image: categoryImage('jackets.svg'),
   },
   {
     id: 'sweatshirts',
     label: 'SWEATSHIRTS',
     keywords: ['sweatshirt', 'sweater'],
-    image: '/images/categories/sweatshirts.jpg',
+    image: categoryImage('sweatshirts.svg'),
   },
   {
     id: 'hoodies',
     label: 'HOODIES',
     keywords: ['hoodie'],
-    image: '/images/categories/hoodies.jpg',
+    image: categoryImage('hoodies.svg'),
   },
   {
     id: 'tanks',
     label: 'TANKS',
     keywords: ['tank'],
-    image: '/images/categories/tanks.jpg',
+    image: categoryImage('tanks.svg'),
   },
   {
     id: 'shirts',
     label: 'SHIRTS',
     keywords: ['shirt'],
-    image: '/images/categories/shirts.jpg',
+    image: categoryImage('shirts.svg'),
   },
   {
     id: 'tshirts',
     label: 'T-SHIRTS',
     keywords: ['t-shirt', 'tshirt', 't shirt'],
-    image: '/images/categories/tshirts.jpg',
+    image: categoryImage('tshirts.svg'),
   },
 ];
 
@@ -54,40 +56,23 @@ const CARRIES_SLEEVE_FILTER = ['shirts', 'tshirts'];
 
 const Upperwear = (props) => {
   const navigate = useNavigate();
-  const { getByCategory, loading, error } = useProducts();
-  const baseProducts = getByCategory(CATEGORY) || [];
-
+  const { getByCategory, fetchByCategory, loading, error, products } = useProducts();
   const [selectedSub, setSelectedSub] = useState(null);
   const [sleeve, setSleeve] = useState('all');
+
+  useEffect(() => {
+    fetchByCategory(CATEGORY);
+  }, [fetchByCategory]);
 
   const showSleeveFilter = selectedSub && CARRIES_SLEEVE_FILTER.includes(selectedSub);
   const activeSubObj = SUB_CATEGORIES.find((s) => s.id === selectedSub);
 
   const filteredProducts = useMemo(() => {
-    let result = baseProducts;
+    const base = selectedSub ? getByCategory(CATEGORY, selectedSub) : getByCategory(CATEGORY);
 
-    if (activeSubObj && activeSubObj.keywords.length > 0) {
-      result = result.filter((p) => {
-        const haystack = [
-          p.subcategory,
-          p.item_group,
-          p.category,
-          p.name,
-          p.product_name,
-          p.title,
-          p.sleeve_type,
-          p.sleeve,
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        return activeSubObj.keywords.some((kw) => haystack.includes(kw));
-      });
-    }
-
-    if (showSleeveFilter && sleeve !== 'all') {
+    if (selectedSub && showSleeveFilter && sleeve !== 'all') {
       const sleeveTarget = SLEEVE_BUTTONS.find((s) => s.id === sleeve);
-      result = result.filter((p) => {
+      return base.filter((p) => {
         const haystack = [
           p.sleeve_type,
           p.sleeve,
@@ -107,8 +92,8 @@ const Upperwear = (props) => {
       });
     }
 
-    return result;
-  }, [baseProducts, activeSubObj, showSleeveFilter, sleeve]);
+    return base;
+  }, [products, selectedSub, showSleeveFilter, sleeve, getByCategory]);
 
   return (
     <div className="bg-[#0f0f0f] min-h-screen text-white px-3 md:px-6 pt-28 md:pt-32 pb-12">
@@ -120,6 +105,7 @@ const Upperwear = (props) => {
             if (selectedSub) {
               setSelectedSub(null);
               setSleeve('all');
+              fetchByCategory(CATEGORY);
             } else {
               navigate(-1);
             }
@@ -159,6 +145,7 @@ const Upperwear = (props) => {
               onClick={() => {
                 setSelectedSub(cat.id);
                 setSleeve('all');
+                fetchByCategory(CATEGORY, cat.id);
               }}
               className="relative group cursor-pointer overflow-hidden rounded-xl border border-neutral-800 bg-[#161616] aspect-3/4 flex flex-col justify-end p-3 transition hover:border-neutral-500"
             >
@@ -186,7 +173,11 @@ const Upperwear = (props) => {
       {showSleeveFilter && (
         <div className="mx-auto max-w-7xl mb-6 flex items-center justify-between border-b border-neutral-800 pb-4">
           <button
-            onClick={() => setSelectedSub(null)}
+            onClick={() => {
+              setSelectedSub(null);
+              setSleeve('all');
+              fetchByCategory(CATEGORY);
+            }}
             className="text-xs font-mono text-neutral-400 hover:text-white uppercase tracking-wider"
           >
             ← View All Categories

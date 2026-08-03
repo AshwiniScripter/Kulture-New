@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCategory from './ProductCategory';
 import { useProducts } from '../context/ProductsContext';
@@ -11,31 +11,25 @@ const SLEEVE_BUTTONS = [
 
 const Shirts = (props) => {
   const navigate = useNavigate();
-  const { getByCategory, loading, error } = useProducts();
+  const { getByCategory, fetchByCategory, loading, error } = useProducts();
   const [sleeve, setSleeve] = useState('all');
-  const baseProducts = getByCategory('upperwear') || [];
+
+  useEffect(() => {
+    fetchByCategory('upperwear', 'shirts');
+  }, [fetchByCategory]);
+
+  const baseProducts = getByCategory('upperwear', 'shirts');
 
   const products = useMemo(() => {
-    let result = baseProducts.filter((p) => {
-      const haystack = [p.subcategory, p.item_group, p.category, p.name, p.product_name, p.title]
+    if (sleeve === 'all') return baseProducts;
+    const target = SLEEVE_BUTTONS.find((s) => s.id === sleeve);
+    return baseProducts.filter((p) => {
+      const haystack = [p.sleeve_type, p.sleeve, p.name, p.product_name, p.title]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
-      return haystack.includes('shirt') && !haystack.includes('t-shirt') && !haystack.includes('tshirt');
+      return target && target.keywords.some((kw) => haystack.includes(kw));
     });
-
-    if (sleeve !== 'all') {
-      const target = SLEEVE_BUTTONS.find((s) => s.id === sleeve);
-      result = result.filter((p) => {
-        const haystack = [p.sleeve_type, p.sleeve, p.name, p.product_name, p.title]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        return target && target.keywords.some((kw) => haystack.includes(kw));
-      });
-    }
-
-    return result;
   }, [baseProducts, sleeve]);
 
   return (

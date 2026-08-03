@@ -3,9 +3,10 @@ import { apiCall } from './apiClient';
 import { normalizeProduct } from '../utils/productUtils';
 
 const productService = {
-  getProducts: async (category = null, store = null) => {
+  getProducts: async ({ category = null, subcategory = null, store = null } = {}) => {
     const query = {};
     if (category) query.category = category;
+    if (subcategory) query.subcategory = subcategory;
     if (store) query.store = store;
     const result = await apiCall(`${API_ENDPOINT}.api.get_products`, {
       method: 'GET',

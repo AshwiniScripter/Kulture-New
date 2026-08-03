@@ -6,6 +6,36 @@ const formatPrice = (value) => {
 };
 
 const CATEGORY_ALIASES = {
+  upperwear: [
+    'upperwear',
+    'upper',
+    'top',
+    'topwear',
+    'tshirt',
+    't-shirt',
+    't-shirts',
+    'tee',
+    'tees',
+    'sweater',
+    'hoodie',
+    'jacket',
+    'shirt',
+  ],
+  lowerwear: [
+    'lowerwear',
+    'lower',
+    'bottom',
+    'bottomwear',
+    'denim',
+    'jeans',
+    'pant',
+    'pants',
+    'short',
+    'shorts',
+    'jogger',
+    'trouser',
+    'cargo',
+  ],
   tshirts: ['tshirt', 't-shirt', 't-shirts', 'tshirts', 'upper', 'upperwear', 'tee', 'tees'],
   shoes: ['shoe', 'shoes', 'footwear', 'sneaker', 'boots'],
   pants: ['pant', 'pants', 'trouser', 'trousers', 'bottom', 'bottomwear', 'lower', 'denim', 'jeans'],
@@ -14,6 +44,40 @@ const CATEGORY_ALIASES = {
   bandana: ['bandana', 'bandanas', 'mask', 'wrap', 'bandana & mask'],
   watches: ['watch', 'watches'],
   shades: ['shade', 'shades', 'sunglass', 'sunglasses', 'glasses', 'eyewear'],
+};
+
+const SUB_CATEGORY_KEYWORDS = {
+  jeans: ['jean', 'denim'],
+  sweatpants: ['sweatpant', 'jogger', 'trackpant'],
+  jorts: ['jort', 'short'],
+  'liner-pants': ['liner', 'cargo', 'trouser'],
+  jackets: ['jacket'],
+  sweatshirts: ['sweatshirt', 'sweater'],
+  hoodies: ['hoodie'],
+  tanks: ['tank'],
+  shirts: { include: ['shirt'], exclude: ['t-shirt', 'tshirt', 't shirt', 'tee'] },
+  tshirts: ['t-shirt', 'tshirt', 't shirts', 't shirt', 'tshirts'],
+};
+
+const matchSubcategory = (product, subcategory) => {
+  const spec = SUB_CATEGORY_KEYWORDS[subcategory];
+  if (!spec) return true;
+  const haystack = [
+    product.subcategory,
+    product.item_group,
+    product.category,
+    product.name,
+    product.product_name,
+    product.title,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  const include = Array.isArray(spec) ? spec : spec.include;
+  const exclude = Array.isArray(spec) ? [] : spec.exclude || [];
+  const hasIncluded = include.some((kw) => haystack.includes(kw.toLowerCase()));
+  const hasExcluded = exclude.some((kw) => haystack.includes(kw.toLowerCase()));
+  return hasIncluded && !hasExcluded;
 };
 
 const matchCategory = (productCategory, key) => {
@@ -63,4 +127,4 @@ const normalizeProduct = (p) => {
   };
 };
 
-export { formatPrice, CATEGORY_ALIASES, matchCategory, normalizeProduct, normalizeSizes };
+export { formatPrice, CATEGORY_ALIASES, matchCategory, matchSubcategory, normalizeProduct, normalizeSizes };

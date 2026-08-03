@@ -18,7 +18,7 @@ const Categories = () => {
         navigate("/shoes");
         break;
       case "pants":
-        navigate("/pants");
+        navigate("/lowerwear");
         break;
       case "accessories":
         navigate("/accessories");
