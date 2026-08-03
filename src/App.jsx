@@ -83,7 +83,7 @@ function App() {
   return (
     <AuthProvider>
       <ProductsProvider>
-        <BrowserRouter basename="/kulture-vintage">
+        <BrowserRouter basename="/Kulture-New">
           {/* Forces viewport jump to top on navigation */}
           <ScrollToTopSystem />
 

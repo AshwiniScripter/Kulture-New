@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://github.com/AshwiniScripter/kulture-vintage.git",
+  "homepage": "https://AshwiniScripter.github.io/Kulture-New",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
