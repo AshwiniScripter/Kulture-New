@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IoCloseOutline, IoTrashOutline, IoTicketOutline, IoArrowForward, IoChevronBack, IoCheckmarkCircleOutline } from "react-icons/io5";
+import { IoCloseOutline, IoTrashOutline, IoTicketOutline, IoArrowForward, IoChevronBack, IoLockClosedOutline } from "react-icons/io5";
 import orderService from '../services/orderService';
+import { initiateRazorpayPayment } from '../utils/paymentHandler';
+import { cartLineKey } from '../utils/productUtils';
 import { useAuth } from '../context/AuthContext';
 
 const CartDrawer = ({ isOpen, onClose, cartItems, setCartItems }) => {
@@ -10,10 +12,9 @@ const CartDrawer = ({ isOpen, onClose, cartItems, setCartItems }) => {
   const [couponCode, setCouponCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState(0);
 
-  const [view, setView] = useState('cart'); // 'cart' | 'checkout' | 'success'
-  const [orderId, setOrderId] = useState('');
+  const [view, setView] = useState('cart'); // 'cart' | 'checkout'
   const [checkoutError, setCheckoutError] = useState('');
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutStage, setCheckoutStage] = useState(null); // null | 'initializing' | 'payment' | 'verifying' | 'creating'
   const [checkoutForm, setCheckoutForm] = useState({
     email: user?.email || '',
     name: user?.full_name || user?.name || '',
@@ -48,9 +49,9 @@ const CartDrawer = ({ isOpen, onClose, cartItems, setCartItems }) => {
   };
 
   // Update specific item quantities
-  const updateQuantity = (id, amount) => {
+  const updateQuantity = (lineKey, amount) => {
     setCartItems(prev => prev.map(item => {
-      if (item.id === id) {
+      if (cartLineKey(item) === lineKey) {
         const newQty = item.quantity + amount;
         return newQty > 0 ? { ...item, quantity: newQty } : item;
       }
@@ -59,8 +60,8 @@ const CartDrawer = ({ isOpen, onClose, cartItems, setCartItems }) => {
   };
 
   // Remove item
-  const removeItem = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
+  const removeItem = (lineKey) => {
+    setCartItems(prev => prev.filter(item => cartLineKey(item) !== lineKey));
   };
 
   const startCheckout = () => {
@@ -77,8 +78,24 @@ const CartDrawer = ({ isOpen, onClose, cartItems, setCartItems }) => {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     setCheckoutError('');
-    setCheckoutLoading(true);
+    setCheckoutStage('initializing');
     try {
+      // 1-3. Create Razorpay order, open popup, verify payment.
+      // The backend expects the amount in rupees and converts to paise.
+      await initiateRazorpayPayment({
+        amount: Math.round(total),
+        name: 'Kulture Vintage',
+        description: 'Order payment',
+        prefill: {
+          email: checkoutForm.email,
+          name: checkoutForm.name,
+          contact: checkoutForm.phone,
+        },
+        onStage: setCheckoutStage,
+      });
+
+      // 4. Payment verified — create the order on the backend.
+      setCheckoutStage('creating');
       const items = cartItems.map((item) => ({
         product: item.product_id || item.id,
         size: item.size || item.sizeNames?.[0] || 'One Size',
@@ -92,16 +109,17 @@ const CartDrawer = ({ isOpen, onClose, cartItems, setCartItems }) => {
         items,
       });
       if (result && result.success) {
-        setOrderId(result.order);
-        setView('success');
+        const orderNo = result.order || result.order_id || result.name || '';
         setCartItems([]);
+        onClose();
+        navigate(`/order-success/${encodeURIComponent(orderNo)}`);
       } else {
-        setCheckoutError(result?.message || 'Order creation failed.');
+        throw new Error(result?.message || 'Order creation failed.');
       }
     } catch (err) {
-      setCheckoutError(err.message || 'Order creation failed.');
+      setCheckoutError(err.message || 'Payment could not be completed.');
     } finally {
-      setCheckoutLoading(false);
+      setCheckoutStage(null);
     }
   };
 
@@ -123,7 +141,7 @@ const CartDrawer = ({ isOpen, onClose, cartItems, setCartItems }) => {
                 </button>
               )}
               <h2 className="text-lg font-normal tracking-[0.2em] uppercase">
-                {view === 'checkout' ? 'CHECKOUT' : view === 'success' ? 'ORDER PLACED' : 'YOUR CART'}
+                {view === 'checkout' ? 'CHECKOUT' : 'YOUR CART'}
               </h2>
             </div>
             <button onClick={onClose} className="p-1 hover:bg-neutral-800 rounded-lg transition">
@@ -208,29 +226,19 @@ const CartDrawer = ({ isOpen, onClose, cartItems, setCartItems }) => {
 
                 <button
                   type="submit"
-                  disabled={checkoutLoading}
+                  disabled={checkoutStage !== null}
                   className="w-full bg-white hover:bg-neutral-200 text-black text-xs font-bold tracking-[0.2em] py-3.5 rounded-xl uppercase transition disabled:opacity-60 flex items-center justify-center gap-2"
                 >
-                  {checkoutLoading ? 'PLACING ORDER...' : 'PLACE ORDER'}
+                  {checkoutStage === 'initializing' ? 'INITIALIZING PAYMENT...' :
+                   checkoutStage === 'payment' ? 'PROCESSING PAYMENT...' :
+                   checkoutStage === 'verifying' ? 'VERIFYING PAYMENT...' :
+                   checkoutStage === 'creating' ? 'PLACING ORDER...' : 'PLACE ORDER'}
                 </button>
+                <p className="text-center text-[10px] text-neutral-600 flex items-center justify-center gap-1">
+                  <IoLockClosedOutline className="text-[10px]" />
+                  SECURED PAYMENT BY RAZORPAY
+                </p>
               </form>
-            )}
-
-            {view === 'success' && (
-              <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-10">
-                <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/40 flex items-center justify-center">
-                  <IoCheckmarkCircleOutline className="text-3xl text-green-400" />
-                </div>
-                <p className="text-xs text-neutral-400 uppercase tracking-[0.2em]">Order placed successfully!</p>
-                <p className="text-sm text-white font-bold tracking-wider">ORDER ID</p>
-                <p className="text-lg font-black text-green-400 tracking-widest">{orderId}</p>
-                <button
-                  onClick={onClose}
-                  className="mt-2 w-full bg-[#1a1a1a] hover:bg-neutral-800 border border-neutral-800 text-white text-xs font-bold tracking-[0.2em] py-3 rounded-xl uppercase transition"
-                >
-                  CONTINUE SHOPPING
-                </button>
-              </div>
             )}
 
             {view === 'cart' && cartItems.length === 0 ? (
@@ -239,8 +247,10 @@ const CartDrawer = ({ isOpen, onClose, cartItems, setCartItems }) => {
                 <p className="text-[11px] text-neutral-600">Add pieces to build your personal culture.</p>
               </div>
             ) : view === 'cart' ? (
-              cartItems.map((item) => (
-                <div key={item.id} className="flex gap-4 p-3 bg-[#111111] rounded-xl border border-neutral-900">
+              cartItems.map((item) => {
+                const lineKey = cartLineKey(item);
+                return (
+                <div key={lineKey} className="flex gap-4 p-3 bg-[#111111] rounded-xl border border-neutral-900">
                   {item.image ? (
                     <img src={item.image} alt={item.title} className="w-20 h-20 object-cover rounded-lg shrink-0 border border-neutral-800" />
                   ) : (
@@ -256,18 +266,19 @@ const CartDrawer = ({ isOpen, onClose, cartItems, setCartItems }) => {
 
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center bg-black border border-neutral-800 rounded-md overflow-hidden">
-                        <button onClick={() => updateQuantity(item.id, -1)} className="px-2.5 py-0.5 hover:bg-neutral-800 text-neutral-400 hover:text-white transition font-bold">-</button>
+                        <button onClick={() => updateQuantity(lineKey, -1)} className="px-2.5 py-0.5 hover:bg-neutral-800 text-neutral-400 hover:text-white transition font-bold">-</button>
                         <span className="px-3 text-xs text-white">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, 1)} className="px-2.5 py-0.5 hover:bg-neutral-800 text-neutral-400 hover:text-white transition font-bold">+</button>
+                        <button onClick={() => updateQuantity(lineKey, 1)} className="px-2.5 py-0.5 hover:bg-neutral-800 text-neutral-400 hover:text-white transition font-bold">+</button>
                       </div>
                       
-                      <button onClick={() => removeItem(item.id)} className="text-neutral-500 hover:text-red-500 transition p-1">
+                      <button onClick={() => removeItem(lineKey)} className="text-neutral-500 hover:text-red-500 transition p-1">
                         <IoTrashOutline className="text-base" />
                       </button>
                     </div>
                   </div>
                 </div>
-              ))
+                );
+              })
             ) : null}
           </div>
 

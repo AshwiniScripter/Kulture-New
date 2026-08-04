@@ -7,7 +7,7 @@ const getCookie = (name) => {
   return null;
 };
 
-const apiCall = async (endpoint, { method = 'GET', body = null, query = null } = {}) => {
+const apiCall = async (endpoint, { method = 'GET', body = null, query = null, raw = false } = {}) => {
   let url = endpoint;
   if (query) {
     const qs = new URLSearchParams();
@@ -47,7 +47,7 @@ const apiCall = async (endpoint, { method = 'GET', body = null, query = null } =
     throw new Error(extractErrorMessage(data) || `API request failed (${response.status})`);
   }
 
-  if (data && typeof data === 'object' && Object.prototype.hasOwnProperty.call(data, 'message')) {
+  if (!raw && data && typeof data === 'object' && Object.prototype.hasOwnProperty.call(data, 'message')) {
     return data.message;
   }
   return data;

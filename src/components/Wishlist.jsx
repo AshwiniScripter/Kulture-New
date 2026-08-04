@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoHeart, IoBagOutline } from 'react-icons/io5';
 import { useProducts } from '../context/ProductsContext';
+import { cartLineKey } from '../utils/productUtils';
 
 const Wishlist = ({ wishlistedIds = [], setWishlistedIds, cartItems = [], setCartItems }) => {
   const navigate = useNavigate();
@@ -32,15 +33,30 @@ const Wishlist = ({ wishlistedIds = [], setWishlistedIds, cartItems = [], setCar
     quantity: 1
   });
 
+  const mergeIntoCart = (nextItems) => {
+    setCartItems((prev) => {
+      const merged = [...prev];
+      nextItems.forEach((newItem) => {
+        const idx = merged.findIndex((item) => cartLineKey(item) === cartLineKey(newItem));
+        if (idx >= 0) {
+          merged[idx] = { ...merged[idx], quantity: merged[idx].quantity + newItem.quantity };
+        } else {
+          merged.push(newItem);
+        }
+      });
+      return merged;
+    });
+  };
+
   const handleAddToCart = (product) => {
     const cartProduct = buildCartItem(product);
-    setCartItems([...cartItems, cartProduct]);
+    mergeIntoCart([cartProduct]);
     removeFromWishlist(product.id);
   };
 
   const handleAddAllToCart = () => {
     const newItems = wishlistedProducts.map(buildCartItem);
-    setCartItems([...cartItems, ...newItems]);
+    mergeIntoCart(newItems);
     setWishlistedIds([]);
   };
 

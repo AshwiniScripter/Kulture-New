@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '../context/ProductsContext';
+import { cartLineKey } from '../utils/productUtils';
 
 const ProductGrid = ({ 
   cartItems, 
@@ -29,13 +30,14 @@ const ProductGrid = ({
 
   const triggerCart = (product) => {
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === product.id);
+      const newItem = { ...product, size: product.sizeNames?.[0] || product.size || 'One Size', quantity: 1 };
+      const existingItem = prevItems.find((item) => cartLineKey(item) === cartLineKey(newItem));
       if (existingItem) {
         return prevItems.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          cartLineKey(item) === cartLineKey(newItem) ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prevItems, { ...product, quantity: 1 }];
+      return [...prevItems, newItem];
     });
 
     setCartAlert(product.title);

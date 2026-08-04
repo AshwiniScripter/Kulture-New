@@ -44,6 +44,7 @@ import Watches from "./components/Watches";
 import NewArrival from "./components/NewArrival";
 import Profile from "./components/Profile"; 
 import Addresses from "./components/Addresses";
+import OrderSuccess from "./components/OrderSuccess";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
 import ForgotPassword from "./components/ForgotPassword";
@@ -192,6 +193,9 @@ function AppContent() {
 
             {/* ADDRESSES MANAGEMENT VIEW */}
             <Route path="/addresses" element={<Addresses />} />
+
+            {/* ORDER CONFIRMATION / SUCCESS VIEW */}
+            <Route path="/order-success/:id" element={<OrderSuccess />} />
 
             {/* UPPERWEAR MAIN LANDING & SUBCATEGORY ROUTES */}
             <Route

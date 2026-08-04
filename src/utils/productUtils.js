@@ -93,8 +93,12 @@ const normalizeSizes = (rawSizes) => {
     .filter((s) => s && s.size);
 };
 
-const normalizeProduct = (p) => {
-  if (!p) return null;
+// Unique identity for a single cart line. The same product can be added with
+// different sizes/colours, so id alone is not unique across the cart.
+const cartLineKey = (item) =>
+  `${item?.id}__${item?.size || item?.sizeNames?.[0] || 'One Size'}__${item?.color || ''}`;
+
+const normalizeProduct = (p) => {  if (!p) return null;
   const id = p.product_id || p.id || p.name;
   const finalPrice = Number(p.final_price ?? p.finalPrice ?? p.price ?? 0) || 0;
   const originalPrice = Number(p.price ?? finalPrice) || finalPrice;
@@ -127,4 +131,4 @@ const normalizeProduct = (p) => {
   };
 };
 
-export { formatPrice, CATEGORY_ALIASES, matchCategory, matchSubcategory, normalizeProduct, normalizeSizes };
+export { formatPrice, CATEGORY_ALIASES, matchCategory, matchSubcategory, normalizeProduct, normalizeSizes, cartLineKey };
