@@ -29,7 +29,7 @@ const STORES = [
   {
     id: 'pcmc',
     name: 'PCMC Store',
-    complex: 'Siddhivinayak Ginger',
+    complex: 'Shop No. 36 Ground Floor, Vision flora mall',
     address: '84, Kunal Icon Rd, opp. PCMC play ground, Siddhivinayak Ginger Society, Pimple Saudagar, Pimpri-Chinchwad, Maharashtra – 411027',
     phone: '+91 86250 62218',
     tel: '+918625062218'
@@ -139,7 +139,7 @@ const Footer = () => {
             {[
               { label: 'UPPERWEAR', path: '/upperwear' },
               { label: 'SHOES', path: '/shoes' },
-              { label: 'PANTS', path: '/pants' },
+              { label: 'LOWERWEAR', path: '/lowerwear' },
               { label: 'ACCESSORIES', path: '/accessories' },
             ].map((cat) => (
               <li key={cat.label}>
