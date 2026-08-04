@@ -12,11 +12,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://72.62.199.223',
+        target: 'https://erp.kulturevintage.com',
         changeOrigin: true,
       },
       '/files': {
-        target: 'http://72.62.199.223',
+        target: 'https://erp.kulturevintage.com',
         changeOrigin: true,
       },
     },

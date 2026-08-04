@@ -2,10 +2,10 @@
 // Deploy this worker, then set VITE_API_BASE_URL to its https:// URL
 // (e.g. https://kulture-api.YOUR_SUBDOMAIN.workers.dev) and redeploy the app.
 //
-// The worker forwards every request to /api/* -> http://72.62.199.223/api/*
+// The worker forwards every request to /api/* -> https://erp.kulturevintage.com/api/*
 // and keeps the CORS/credentials behaviour the app relies on.
 
-const BACKEND = 'http://72.62.199.223';
+const BACKEND = 'https://erp.kulturevintage.com';
 
 const HEADERS_TO_COPY = [
   'content-type',
