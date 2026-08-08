@@ -20,6 +20,7 @@ const CATEGORY_ALIASES = {
     'hoodie',
     'jacket',
     'shirt',
+    'innerwear',
   ],
   lowerwear: [
     'lowerwear',
@@ -35,6 +36,7 @@ const CATEGORY_ALIASES = {
     'jogger',
     'trouser',
     'cargo',
+    'innerwear',
   ],
   tshirts: ['tshirt', 't-shirt', 't-shirts', 'tshirts', 'upper', 'upperwear', 'tee', 'tees'],
   shoes: ['shoe', 'shoes', 'footwear', 'sneaker', 'boots'],
@@ -51,12 +53,14 @@ const SUB_CATEGORY_KEYWORDS = {
   sweatpants: ['sweatpant', 'jogger', 'trackpant'],
   jorts: ['jort', 'short'],
   'liner-pants': ['liner', 'cargo', 'trouser'],
+  'bottom-innerwear': ['innerwear', 'inner', 'undershort', 'thermal', 'long john'],
   jackets: ['jacket'],
   sweatshirts: ['sweatshirt', 'sweater'],
   hoodies: ['hoodie'],
   tanks: ['tank'],
   shirts: { include: ['shirt'], exclude: ['t-shirt', 'tshirt', 't shirt', 'tee'] },
   tshirts: ['t-shirt', 'tshirt', 't shirts', 't shirt', 'tshirts'],
+  'top-innerwear': ['innerwear', 'inner', 'undershirt', 'thermal', 'vest'],
 };
 
 const matchSubcategory = (product, subcategory) => {

@@ -44,6 +44,12 @@ const SUB_CATEGORIES = [
     keywords: ['t-shirt', 'tshirt', 't shirt'],
     image: categoryImage('tshirts.svg'),
   },
+  {
+    id: 'top-innerwear',
+    label: 'TOP INNERWEAR',
+    keywords: ['innerwear', 'inner', 'undershirt', 'thermal'],
+    image: categoryImage('top-innerwear.svg'),
+  },
 ];
 
 const SLEEVE_BUTTONS = [
@@ -59,6 +65,8 @@ const Upperwear = (props) => {
   const { getByCategory, fetchByCategory, loading, error, products } = useProducts();
   const [selectedSub, setSelectedSub] = useState(null);
   const [sleeve, setSleeve] = useState('all');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filterCount, setFilterCount] = useState(0);
 
   useEffect(() => {
     fetchByCategory(CATEGORY);
@@ -134,6 +142,36 @@ const Upperwear = (props) => {
             {selectedSub ? activeSubObj?.label : 'UPPERWEAR'}
           </h1>
         </div>
+
+        {/* Filter Button (Right of category name) */}
+        {selectedSub && (
+          <button
+            onClick={() => setFilterOpen(!filterOpen)}
+            aria-label="Filters"
+            className={`relative w-12 h-12 bg-[#121212] border rounded-xl flex items-center justify-center hover:bg-neutral-800 transition shrink-0 cursor-pointer ${
+              filterOpen ? 'border-red-600 text-white' : 'border-neutral-800/80 text-white'
+            }`}
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 4h18M3 12h18M3 20h18M7 2v4M17 10v4M11 18v4"
+              />
+            </svg>
+            {filterCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                {filterCount}
+              </span>
+            )}
+          </button>
+        )}
       </div>
 
       {/* 1. SUBCATEGORY VISUAL CARDS GRID */}
@@ -207,6 +245,9 @@ const Upperwear = (props) => {
           products={filteredProducts}
           loading={loading}
           error={error}
+          filterOpen={filterOpen}
+          setFilterOpen={setFilterOpen}
+          onFilterCountChange={setFilterCount}
           {...props}
         />
       )}

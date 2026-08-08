@@ -20,12 +20,22 @@ const ProductCategory = ({
   cartItems = [], 
   setCartItems, 
   wishlistedIds = [], 
-  setWishlistedIds 
+  setWishlistedIds,
+  filterOpen: externalFilterOpen,
+  setFilterOpen: externalSetFilterOpen,
+  onFilterCountChange = null
 }) => {
   const navigate = useNavigate();
   const [wishlistAlert, setWishlistAlert] = useState(null);
   const [cartAlert, setCartAlert] = useState(null);
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [internalFilterOpen, setInternalFilterOpen] = useState(false);
+
+  const isControlled =
+    externalFilterOpen !== undefined && externalSetFilterOpen !== undefined;
+  const filterOpen = isControlled ? externalFilterOpen : internalFilterOpen;
+  const setFilterOpen = isControlled
+    ? externalSetFilterOpen
+    : setInternalFilterOpen;
 
   const [sortBy, setSortBy] = useState('featured');
   const [selectedColors, setSelectedColors] = useState([]);
@@ -87,6 +97,10 @@ const ProductCategory = ({
     selectedSizes.length + 
     (priceMin !== '' ? 1 : 0) + 
     (priceMax !== '' ? 1 : 0);
+
+  useEffect(() => {
+    if (onFilterCountChange) onFilterCountChange(activeFilterCount);
+  }, [activeFilterCount, onFilterCountChange]);
 
   const resetFilters = () => {
     setSortBy('featured');

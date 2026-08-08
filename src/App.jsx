@@ -27,6 +27,8 @@ import Hoodies from "./components/Hoodies";
 import Tanks from "./components/Tanks";
 import Shirts from "./components/Shirts";
 import Tshirt from "./components/Tshirt"; 
+import TopInnerwear from "./components/TopInnerwear";
+import BottomInnerwear from "./components/BottomInnerwear"; 
 
 import Lowerwear from "./components/Lowerwear";
 import Jeans from "./components/Jeans";
@@ -289,6 +291,19 @@ function AppContent() {
               }
             />
 
+            {/* TOP INNERWEAR SUBCATEGORY ROUTE */}
+            <Route
+              path="/upperwear/top-innerwear"
+              element={
+                <TopInnerwear
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+
             {/* LOWERWEAR LANDING & SUBCATEGORY ROUTES */}
             <Route
               path="/lowerwear"
@@ -338,6 +353,19 @@ function AppContent() {
               path="/liner-pants"
               element={
                 <LinerPants
+                  cartItems={cart}
+                  setCartItems={setCart}
+                  wishlistedIds={wishlist}
+                  setWishlistedIds={setWishlist}
+                />
+              }
+            />
+
+            {/* BOTTOM INNERWEAR SUBCATEGORY ROUTE */}
+            <Route
+              path="/lowerwear/bottom-innerwear"
+              element={
+                <BottomInnerwear
                   cartItems={cart}
                   setCartItems={setCart}
                   wishlistedIds={wishlist}
