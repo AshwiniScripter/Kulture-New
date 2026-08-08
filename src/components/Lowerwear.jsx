@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCategory from './ProductCategory';
+import CategoryBentoGrid from './CategoryBentoGrid';
 import { useProducts } from '../context/ProductsContext';
 
 const CATEGORY = 'lowerwear';
@@ -119,36 +120,16 @@ const Lowerwear = (props) => {
         </button>
       </div>
 
-      {/* 1. SUBCATEGORY VISUAL CARDS GRID (Visible when no subcategory selected) */}
+      {/* 1. SUBCATEGORY VISUAL CARDS GRID (Asymmetric, grid home categories grid style) */}
       {!selectedSub && (
-        <div className="mx-auto max-w-7xl grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {SUB_CATEGORIES.map((cat) => (
-            <div
-              key={cat.id}
-              onClick={() => {
-                setSelectedSub(cat.id);
-                fetchByCategory(CATEGORY, cat.id);
-              }}
-              className="relative group cursor-pointer overflow-hidden rounded-xl border border-neutral-800 bg-[#161616] aspect-3/4 flex flex-col justify-end p-3 transition hover:border-neutral-500"
-            >
-              <img
-                src={cat.image}
-                alt={cat.label}
-                className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition duration-300 opacity-80"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                }}
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent" />
-
-              <div className="relative z-10 bg-neutral-800/90 backdrop-blur-sm rounded-lg py-2 px-2 text-center border border-neutral-700/50">
-                <span className="text-xs md:text-sm font-mono font-bold tracking-wider uppercase text-white block truncate">
-                  {cat.label}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
+        <CategoryBentoGrid
+          category={CATEGORY}
+          items={SUB_CATEGORIES}
+          onSelect={(cat) => {
+            setSelectedSub(cat.id);
+            fetchByCategory(CATEGORY, cat.id);
+          }}
+        />
       )}
 
       {/* 2. PRODUCT GRID */}
