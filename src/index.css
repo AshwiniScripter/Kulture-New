@@ -1,4 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
 @import "tailwindcss";
+
+.font-dripping {
+  font-family: 'Creepster', cursive, sans-serif !important;
+}
 
 @keyframes marquee {
   0% {

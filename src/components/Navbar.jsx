@@ -46,8 +46,8 @@ const Navbar = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
 
   return (
     <>
-      <nav className="absolute top-0 left-0 w-full z-150 bg-transparent">
-        <div className="flex items-center justify-between px-6 pt-6">
+      <nav className="absolute top-0 left-0 w-full max-w-full z-150 bg-transparent">
+        <div className="flex items-center justify-between px-2 sm:px-6 pt-6">
           <Link to="/">
             <img src={logo} alt="Logo" className="w-16 md:w-20 cursor-pointer" />
           </Link>
@@ -118,7 +118,7 @@ const Navbar = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
           </div>
 
           {/* Mobile Cart + Hamburger */}
-          <div className="flex items-center gap-3 sm:gap-4 md:hidden">
+          <div className="flex items-center gap-2 sm:gap-4 md:hidden">
             <button
               type="button"
               onClick={onCartClick}
