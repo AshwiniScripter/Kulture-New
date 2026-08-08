@@ -117,19 +117,34 @@ const Navbar = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
             </button>
           </div>
 
-          {/* Mobile Hamburger */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle Menu"
-            className="md:hidden text-white hover:text-neutral-300 transition cursor-pointer"
-          >
-            {mobileMenuOpen ? (
-              <IoClose className="text-4xl" />
-            ) : (
-              <IoMenu className="text-4xl" />
-            )}
-          </button>
+          {/* Mobile Cart + Hamburger */}
+          <div className="flex items-center gap-3 sm:gap-4 md:hidden">
+            <button
+              type="button"
+              onClick={onCartClick}
+              aria-label="Shopping Cart"
+              className="relative text-white hover:text-neutral-300 transition cursor-pointer"
+            >
+              <HiOutlineShoppingCart className="text-4xl" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center pointer-events-none">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle Menu"
+              className="text-white hover:text-neutral-300 transition cursor-pointer"
+            >
+              {mobileMenuOpen ? (
+                <IoClose className="text-4xl" />
+              ) : (
+                <IoMenu className="text-4xl" />
+              )}
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -173,16 +188,6 @@ const Navbar = ({ cartCount = 0, wishlistCount = 0, onCartClick }) => {
               <span className="text-sm font-mono font-bold tracking-wider text-neutral-200 uppercase">Wishlist</span>
               {wishlistCount > 0 && (
                 <span className="ml-auto bg-red-600 text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">{wishlistCount}</span>
-              )}
-            </button>
-            <button
-              onClick={() => { onCartClick(); setMobileMenuOpen(false); }}
-              className="w-full flex items-center gap-4 px-5 py-4 hover:bg-neutral-900 transition cursor-pointer text-left border-b border-neutral-900"
-            >
-              <HiOutlineShoppingCart className="text-xl text-neutral-400" />
-              <span className="text-sm font-mono font-bold tracking-wider text-neutral-200 uppercase">Cart</span>
-              {cartCount > 0 && (
-                <span className="ml-auto bg-red-600 text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">{cartCount}</span>
               )}
             </button>
             <button
